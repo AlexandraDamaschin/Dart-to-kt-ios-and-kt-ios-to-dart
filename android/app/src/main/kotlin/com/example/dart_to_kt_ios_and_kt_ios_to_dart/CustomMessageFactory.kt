@@ -5,17 +5,13 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.view.View
-import android.view.ViewGroup
 import android.widget.FrameLayout
-import androidx.fragment.app.FragmentContainer
-import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.common.StandardMessageCodec
+import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.platform.PlatformViewFactory
 
-
-class CustomMessage (
+class CustomMessage(
     activity: Activity,
     channel: MethodChannel,
     context: Context,
@@ -32,26 +28,24 @@ class CustomMessage (
     override fun dispose() {}
 
     init {
-        val osmLayoutParams = ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        val osm = KlarnaOSMViewExtended(context, channel)
-
         val containerViewGroup = FrameLayout(context)
-        containerViewGroup.addView(osm, 0, osmLayoutParams)
+
+        val receivedParamFromDart =
+            creationParams["sizedBoxHeightModifiedInNative"]?.toInt()?.plus(20)
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            channel.invokeMethod("FromDartViewHeight", receivedParamFromDart)
+        }, 0)
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            channel.invokeMethod("FromNativeString", "Hello from kotlin!")
+        }, 0)
 
         view = containerViewGroup
     }
 }
 
-class KlarnaOSMViewExtended(context: Context, private val channel: MethodChannel)  {
-        Handler(Looper.getMainLooper()).postDelayed({
-            channel.invokeMethod("KlarnaOSMViewHeight", 20)
-        }, 0)
-}
-
-class KlarnaOnSiteMessageFactory(
+class CustomMessageFactory(
     private val activity: Activity,
     private val channel: MethodChannel,
 ) :
